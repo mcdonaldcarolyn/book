@@ -13,4 +13,6 @@ def create_random_book(finished: bool = True) -> Book:
 def generate_random_books(num_of_books: int, finished: bool = True) -> list:
   book_list: list = []
   for i in range(num_of_books):
-    book: Book = create_random
+    book: Book = create_random_book(finished)
+    book_list.append(book)
+  return book_list
