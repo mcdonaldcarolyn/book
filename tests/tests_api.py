@@ -2,9 +2,9 @@ import random
 
 from rest_framework.reverse import reverse
 from models import Book 
-from base import BaseBookTest
+from tests.base import BaseBookTest
 
-class BookAPITest(BaseBooKTest):
+class BookAPITest(BaseBookTest):
   def verify_book(self, book: Book, book_dict: dict):
     self.assertEqual(book.id, book_dict['id'])
     self.assertEqual(book.title, book_dict['title'])
@@ -81,8 +81,38 @@ class BookAPITest(BaseBooKTest):
     for book in book_list:
       url = reverse('book-detail', kwargs={'pk': book.id})
       response = self.client.delete(url)
+      self.assertEqual(response.status_code, 204)
+      deleted_book = Book.objects.filter(id =book.id).first()
       self.assertIsNone(deleted_book)
 
   def test_list_finished(self):
     url = reverse('book-finished')
-    response = self.client
+    response = self.client.get(url)
+    self.assertEqual(response.status_code, 200)
+
+    book_list = Book.objects.filter(finished=True)
+    book_result = response.data
+
+    self.assertEqual(len(book_list), len(book_result))
+
+    for i in range(len(book_list)):
+      book = book_list[i]
+      book_dict = book_result[i]
+      self.verity_book(book, book_dict)
+
+  def test_list_unfinshed(self):
+    url = reverse('book-unfinished')
+    response = self.client.get(url)
+    self.assertEqual(response.status_code, 200)
+
+    book_list = Book.objects.filter(finished=False)
+    book_result = response.data
+
+    self.assertEqual(len(book_list), len(book_result))
+
+    for i in range(len(book_list)):
+      book = book_list[i]
+      book_dict = book_result[i]
+      self.verify_book(book, book_dict)
+
+
